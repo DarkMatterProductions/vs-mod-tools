@@ -42,7 +42,13 @@ _FILE_FLAGS: frozenset[str] = frozenset({"-f", "--file"})
 
 
 def _add_static_args(parser: argparse.ArgumentParser) -> None:
-    """Add the fixed (non-dynamic) arguments to *parser*."""
+    """
+    Add the fixed (non-dynamic) arguments to *parser*.
+
+    :param parser: (argparse.ArgumentParser) The parser to add arguments to.
+
+    :return: (None)
+    """
     parser.add_argument(
         "-f",
         "--file",
@@ -62,10 +68,12 @@ def _add_static_args(parser: argparse.ArgumentParser) -> None:
 
 def _build_parser(data: dict) -> argparse.ArgumentParser:  # type: ignore[type-arg]
     """
-    Build the full argument parser including one flag per variantgroup in *data*.
+    Build and return the full argument parser, including dynamic group filter
+    arguments based on the provided JSON data.
 
-    Dynamic group flags are placed in a dedicated ``variant group filter
-    arguments`` section so they are visually distinct from the static options.
+    :param data: (dict) The parsed VS item definition JSON.
+
+    :return: (argparse.ArgumentParser) The configured argument parser.
     """
     parser = argparse.ArgumentParser(
         description=_DESCRIPTION,
@@ -100,12 +108,9 @@ def _build_parser(data: dict) -> argparse.ArgumentParser:  # type: ignore[type-a
 
 def main(argv: list[str] | None = None) -> None:
     """
-    Entrypoint for ``vs-show-variants``.
+    Entrypoint for `vs-show-variants`.
 
-    Parameters
-    ----------
-    argv:
-        Argument list to parse.  Defaults to ``sys.argv[1:]`` when *None*,
+    :param argv: (str) Argument list to parse.  Defaults to `sys.argv[1:]` when *None*,
         which is the normal runtime behaviour.  Pass an explicit list when
         calling from tests to avoid touching the real process arguments.
     """

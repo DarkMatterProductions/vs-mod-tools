@@ -19,7 +19,7 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
+wheels/https://github.com/DarkMatterProductions/vs-mod-tools
 share/python-wheels/
 *.egg-info/
 .installed.cfg
