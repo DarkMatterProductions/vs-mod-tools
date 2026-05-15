@@ -8,18 +8,11 @@ def raw_cartesian(data: dict) -> list[str]:  # type: ignore[type-arg]
     """
     Generate the full cartesian product of all variant group states.
 
-    No ``skipVariants`` or ``allowedVariants`` filtering is applied.
-    This is the structural baseline used for validation.
+    No ``skipVariants`` or ``allowedVariants`` filtering is applied. This is the structural baseline used for validation.
 
-    Parameters
-    ----------
-    data:
-        Parsed VS item definition dict.
+    :param data: (dict) Parsed VS item definition dict.
 
-    Returns
-    -------
-    list[str]
-        Every possible variant code, e.g. ``["item-head-leather", ...]``.
+    :return: (list[str]) Every possible variant code, e.g. ``["item-head-leather", ...]``.
     """
     prefix: str = data["code"]
     group_states: list[list[str]] = [
@@ -39,25 +32,12 @@ def generate_variants(
     """
     Build the effective variant list.
 
-    Processing order
-    ----------------
-    1. Cartesian product of (optionally pre-filtered) group states.
-    2. Remove any ``skipVariants`` matches.   *(subtractive)*
-    3. Keep only ``allowedVariants`` matches.  *(filtering)*
+    Processing order: (1) Cartesian product of (optionally pre-filtered) group states. (2) Remove any ``skipVariants`` matches (subtractive). (3) Keep only ``allowedVariants`` matches (filtering).
 
-    Parameters
-    ----------
-    data:
-        Parsed VS item definition dict.
-    user_filters:
-        Maps group code → list of allowed state values.
-        An empty list means *no filter* for that group.
-        OR logic is applied within a group; AND logic across groups.
+    :param data: (dict) Parsed VS item definition dict.
+    :param user_filters: (dict[str, list[str]]) Maps group code → list of allowed state values. An empty list means *no filter* for that group. OR logic is applied within a group; AND logic across groups.
 
-    Returns
-    -------
-    list[str]
-        The effective variant codes after all filtering.
+    :return: (list[str]) The effective variant codes after all filtering.
     """
     prefix: str = data["code"]
 

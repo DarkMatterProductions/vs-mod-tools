@@ -68,8 +68,7 @@ def _add_static_args(parser: argparse.ArgumentParser) -> None:
 
 def _build_parser(data: dict) -> argparse.ArgumentParser:
     """
-    Build and return the full argument parser, including dynamic group filter
-    arguments based on the provided JSON data.
+    Build and return the full argument parser, including dynamic group filter arguments based on the provided JSON data.
 
     :param data: (dict) The parsed VS item definition JSON.
 
@@ -110,9 +109,9 @@ def main(argv: list[str] | None = None) -> None:
     """
     Entrypoint for `vs-show-variants`.
 
-    :param argv: (str) Argument list to parse.  Defaults to `sys.argv[1:]` when *None*,
-        which is the normal runtime behaviour.  Pass an explicit list when
-        calling from tests to avoid touching the real process arguments.
+    :param argv: (list[str] | None) Argument list to parse. Defaults to `sys.argv[1:]` when *None*, which is the normal runtime behaviour. Pass an explicit list when calling from tests to avoid touching the real process arguments.
+
+    :return: (None)
     """
     argv_list: list[str] = argv if argv is not None else sys.argv[1:]
     argv_set: set[str] = set(argv_list)
