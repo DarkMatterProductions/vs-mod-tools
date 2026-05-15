@@ -138,9 +138,7 @@ class TestExtractPatterns:
                     "keepElementsByType": {"item-head-*": ["covered"]},
                 },
                 "footStepSoundByType": {"item-body-*": "leather*"},
-                "protectionModifiersByType": {
-                    "item-*-leather": {"relativeProtection": 0.4}
-                },
+                "protectionModifiersByType": {"item-*-leather": {"relativeProtection": 0.4}},
             },
         }
 

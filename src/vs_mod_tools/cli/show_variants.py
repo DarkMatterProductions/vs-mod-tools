@@ -3,6 +3,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 from vs_mod_tools.core.loader import load_vs_json
 from vs_mod_tools.core.validation import extract_patterns, find_invalid_patterns
@@ -42,7 +43,13 @@ _FILE_FLAGS: frozenset[str] = frozenset({"-f", "--file"})
 
 
 def _add_static_args(parser: argparse.ArgumentParser) -> None:
-    """Add the fixed (non-dynamic) arguments to *parser*."""
+    """
+    Add the fixed (non-dynamic) arguments to *parser*.
+
+    :param parser: (argparse.ArgumentParser) The parser to add arguments to.
+
+    :return: (None)
+    """
     parser.add_argument(
         "-f",
         "--file",
@@ -60,12 +67,13 @@ def _add_static_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _build_parser(data: dict) -> argparse.ArgumentParser:  # type: ignore[type-arg]
+def _build_parser(data: Dict[str, Any]) -> argparse.ArgumentParser:
     """
-    Build the full argument parser including one flag per variantgroup in *data*.
+    Build and return the full argument parser, including dynamic group filter arguments based on the provided JSON data.
 
-    Dynamic group flags are placed in a dedicated ``variant group filter
-    arguments`` section so they are visually distinct from the static options.
+    :param data: (dict) The parsed VS item definition JSON.
+
+    :return: (argparse.ArgumentParser) The configured argument parser.
     """
     parser = argparse.ArgumentParser(
         description=_DESCRIPTION,
@@ -100,14 +108,11 @@ def _build_parser(data: dict) -> argparse.ArgumentParser:  # type: ignore[type-a
 
 def main(argv: list[str] | None = None) -> None:
     """
-    Entrypoint for ``vs-show-variants``.
+    Entrypoint for `vs-show-variants`.
 
-    Parameters
-    ----------
-    argv:
-        Argument list to parse.  Defaults to ``sys.argv[1:]`` when *None*,
-        which is the normal runtime behaviour.  Pass an explicit list when
-        calling from tests to avoid touching the real process arguments.
+    :param argv: (list[str] | None) Argument list to parse. Defaults to `sys.argv[1:]` when *None*, which is the normal runtime behaviour. Pass an explicit list when calling from tests to avoid touching the real process arguments.
+
+    :return: (None)
     """
     argv_list: list[str] = argv if argv is not None else sys.argv[1:]
     argv_set: set[str] = set(argv_list)
@@ -140,20 +145,15 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv_list)
 
     # Build per-group filter map:  group_code → [state, …]  or  []  (no filter)
-    user_filters: dict[str, list[str]] = {
-        group["code"]: getattr(args, group["code"].replace("-", "_")) or []
-        for group in data["variantgroups"]
+    user_filters: Dict[str, List[str]] = {
+        group["code"]: getattr(args, group["code"].replace("-", "_")) or [] for group in data["variantgroups"]
     }
 
     # ── Variant output ────────────────────────────────────────────────────────
     variants = generate_variants(data, user_filters)
 
     active_filters = {k: v for k, v in user_filters.items() if v}
-    filter_note = (
-        "  Filters: " + ", ".join(f"--{k} {v}" for k, v in active_filters.items())
-        if active_filters
-        else ""
-    )
+    filter_note = "  Filters: " + ", ".join(f"--{k} {v}" for k, v in active_filters.items()) if active_filters else ""
 
     sep = "─" * 64
     print(sep)
@@ -188,3 +188,7 @@ def main(argv: list[str] | None = None) -> None:
         else:
             print("  Validation — all patterns match at least one variant ✓")
         print(sep)
+
+
+if __name__ == "__main__":
+    main()

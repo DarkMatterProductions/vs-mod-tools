@@ -251,37 +251,27 @@ class TestMain:
 
         assert "Filters:" not in capsys.readouterr().out
 
-    def test_validate_flag_shows_validation_block(
-        self, mocker: MagicMock, capsys
-    ) -> None:
+    def test_validate_flag_shows_validation_block(self, mocker: MagicMock, capsys) -> None:
         """--validate causes a validation section to appear in the output."""
         self._patch_io(mocker)
         mocker.patch("vs_mod_tools.cli.show_variants.extract_patterns", return_value=[])
-        mocker.patch(
-            "vs_mod_tools.cli.show_variants.find_invalid_patterns", return_value=[]
-        )
+        mocker.patch("vs_mod_tools.cli.show_variants.find_invalid_patterns", return_value=[])
 
         main(["-f", "fake.json", "--validate"])
 
         assert "Validation" in capsys.readouterr().out
 
-    def test_validate_all_valid_shows_success_message(
-        self, mocker: MagicMock, capsys
-    ) -> None:
+    def test_validate_all_valid_shows_success_message(self, mocker: MagicMock, capsys) -> None:
         """When no invalid patterns exist, the success message is shown."""
         self._patch_io(mocker)
         mocker.patch("vs_mod_tools.cli.show_variants.extract_patterns", return_value=[])
-        mocker.patch(
-            "vs_mod_tools.cli.show_variants.find_invalid_patterns", return_value=[]
-        )
+        mocker.patch("vs_mod_tools.cli.show_variants.find_invalid_patterns", return_value=[])
 
         main(["-f", "fake.json", "--validate"])
 
         assert "all patterns match" in capsys.readouterr().out
 
-    def test_validate_shows_invalid_plain_pattern(
-        self, mocker: MagicMock, capsys
-    ) -> None:
+    def test_validate_shows_invalid_plain_pattern(self, mocker: MagicMock, capsys) -> None:
         """Invalid non-template patterns are printed with their field path."""
         self._patch_io(mocker)
         mocker.patch(
@@ -299,9 +289,7 @@ class TestMain:
         assert "item-*-steel" in out
         assert "1 unmatched" in out
 
-    def test_validate_shows_template_and_expanded_form(
-        self, mocker: MagicMock, capsys
-    ) -> None:
+    def test_validate_shows_template_and_expanded_form(self, mocker: MagicMock, capsys) -> None:
         """When the original and expanded patterns differ, both are shown."""
         self._patch_io(mocker)
         mocker.patch(
@@ -319,9 +307,7 @@ class TestMain:
         assert "template" in out
         assert "expanded" in out
 
-    def test_validate_count_reflects_number_of_invalids(
-        self, mocker: MagicMock, capsys
-    ) -> None:
+    def test_validate_count_reflects_number_of_invalids(self, mocker: MagicMock, capsys) -> None:
         """The 'N unmatched expansion(s)' line counts correctly."""
         self._patch_io(mocker)
         mocker.patch("vs_mod_tools.cli.show_variants.extract_patterns", return_value=[])

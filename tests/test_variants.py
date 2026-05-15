@@ -208,7 +208,7 @@ class TestGenerateVariants:
         assert "item-head-leather" in result
         assert "item-body-leather" in result
         assert "item-body-iron" in result
-        assert "item-head-iron" not in result    # removed by skip
+        assert "item-head-iron" not in result  # removed by skip
         assert "item-legs-leather" not in result  # removed by user filter
 
     # ── Negative tests ────────────────────────────────────────────────────────

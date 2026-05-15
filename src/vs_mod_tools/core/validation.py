@@ -11,39 +11,18 @@ def expand_vs_template(pattern: str, data: dict) -> list[str]:  # type: ignore[t
     """
     Expand a VS template pattern into every concrete fnmatch glob it describes.
 
-    VS uses ``{groupcode}`` as a substitution variable. Each token is replaced
-    by each of that group's actual state values, and the cartesian product of
-    all referenced groups is taken so that every unique combination becomes its
-    own concrete pattern.
+    VS uses ``{groupcode}`` as a substitution variable. Each token is replaced by each of that group's actual state values, and the cartesian product of all referenced groups is taken so that every unique combination becomes its own concrete pattern. Any ``{variable}`` not found in the item's variantgroups is left as a ``*`` wildcard so unknown substitutions degrade gracefully. Example: ``expand_vs_template("item-{part}-*", data)`` → ``["item-head-*", "item-body-*", "item-legs-*"]``.
 
-    Any ``{variable}`` not found in the item's variantgroups is left as a ``*``
-    wildcard so unknown substitutions degrade gracefully.
+    :param pattern: (str) A raw VS pattern string, e.g. ``"item-{bodypart}-{construction}-*"``.
+    :param data: (dict) Parsed VS item definition dict (used to look up group states).
 
-    Parameters
-    ----------
-    pattern:
-        A raw VS pattern string, e.g. ``"item-{bodypart}-{construction}-*"``.
-    data:
-        Parsed VS item definition dict (used to look up group states).
-
-    Returns
-    -------
-    list[str]
-        One concrete fnmatch glob per state combination.
-        Returns ``[pattern]`` unchanged when no template variables are present.
-
-    Examples
-    --------
-    >>> expand_vs_template("item-{part}-*", data)
-    ["item-head-*", "item-body-*", "item-legs-*"]
+    :return: (list[str]) One concrete fnmatch glob per state combination. Returns ``[pattern]`` unchanged when no template variables are present.
     """
     tokens: list[str] = _VS_TEMPLATE_RE.findall(pattern)
     if not tokens:
         return [pattern]
 
-    group_states: dict[str, list[str]] = {
-        g["code"]: g["states"] for g in data["variantgroups"]
-    }
+    group_states: dict[str, list[str]] = {g["code"]: g["states"] for g in data["variantgroups"]}
 
     # Preserve insertion order; de-duplicate in case a token appears twice.
     seen: set[str] = set()
@@ -76,47 +55,49 @@ def extract_patterns(data: dict) -> list[tuple[str, str]]:  # type: ignore[type-
     """
     Walk all known variant-pattern fields and return ``(json_path, pattern)`` pairs.
 
-    Handles both top-level fields and deeply nested locations.
+    Handles both top-level fields and deeply nested locations. Covered fields include top-level: ``skipVariants``, ``allowedVariants``, ``shapeByType``, ``texturesByType``, ``durabilityByType``, ``tpHandTransformByType``, ``guiTransformByType``, ``groundTransformByType``; under ``attributes``: ``handbook.groupBy``, ``clothesCategoryByType``, ``attachableToEntity.{categoryCodeByType, disableElementsByType, keepElementsByType}``, ``footStepSoundByType``, ``protectionModifiersByType``; and recursive (anywhere in the tree): ``baseByType``.
 
-    Covered fields
-    --------------
-    Top-level:
-        ``skipVariants``, ``allowedVariants``, ``shapeByType``,
-        ``texturesByType``, ``durabilityByType``, ``tpHandTransformByType``,
-        ``guiTransformByType``, ``groundTransformByType``
+    :param data: (dict) Parsed VS item definition dict.
 
-    Under ``attributes``:
-        ``handbook.groupBy``, ``clothesCategoryByType``,
-        ``attachableToEntity.{categoryCodeByType, disableElementsByType,
-        keepElementsByType}``, ``footStepSoundByType``,
-        ``protectionModifiersByType``
-
-    Recursive (anywhere in the tree):
-        ``baseByType``
-
-    Parameters
-    ----------
-    data:
-        Parsed VS item definition dict.
-
-    Returns
-    -------
-    list[tuple[str, str]]
-        ``(dot-separated JSON path, pattern string)`` pairs.
+    :return: (list[tuple[str, str]]) ``(dot-separated JSON path, pattern string)`` pairs.
     """
     results: list[tuple[str, str]] = []
 
     def from_list(path: str, lst: list) -> None:  # type: ignore[type-arg]
+        """
+        Extract pattern strings from a list and append them as (path, pattern) tuples.
+
+        :param path: (str) The JSON path to this list.
+        :param lst: (list) The list to search for string patterns.
+
+        :return: (None)
+        """
         for item in lst:
             if isinstance(item, str):
                 results.append((path, item))
 
     def from_dict_keys(path: str, dct: dict) -> None:  # type: ignore[type-arg]
+        """
+        Extract keys from a dict and append them as (path, key) tuples.
+
+        :param path: (str) The JSON path to this dict.
+        :param dct: (dict) The dict whose keys are to be harvested.
+
+        :return: (None)
+        """
         for key in dct:
             results.append((path, str(key)))
 
     def recurse_for_key(path: str, node: object, target: str) -> None:
-        """Recursively find every dict keyed by *target* and harvest its keys."""
+        """
+        Recursively find every dict keyed by *target* and harvest its keys.
+
+        :param path: (str) The current JSON path.
+        :param node: (object) The current node being traversed.
+        :param target: (str) The dict key to search for.
+
+        :return: (None)
+        """
         if isinstance(node, dict):
             for k, v in node.items():
                 child = f"{path}.{k}"
@@ -183,29 +164,15 @@ def find_invalid_patterns(
     data: dict,  # type: ignore[type-arg]
 ) -> list[tuple[str, str, str]]:
     """
-    Return ``(path, original_pattern, expanded_pattern)`` triples where the
-    expanded concrete pattern matches no entry in *all_variants*.
+    Return ``(path, original_pattern, expanded_pattern)`` triples where the expanded concrete pattern matches no entry in *all_variants*.
 
-    Template variables (``{groupcode}``) are first expanded into every
-    concrete combination via :func:`expand_vs_template`. Each expansion is
-    checked independently — a template that produces one empty group is
-    reported even if other expansions of the same template are valid.
+    Template variables (``{groupcode}``) are first expanded into every concrete combination via :func:`expand_vs_template`. Each expansion is checked independently — a template that produces one empty group is reported even if other expansions of the same template are valid.
 
-    Parameters
-    ----------
-    patterns:
-        Output of :func:`extract_patterns`.
-    all_variants:
-        The processed variant list (after skip/allow filtering) to validate
-        against.
-    data:
-        Parsed VS item definition dict (passed to :func:`expand_vs_template`).
+    :param patterns: (list[tuple[str, str]]) Output of :func:`extract_patterns`.
+    :param all_variants: (list[str]) The processed variant list (after skip/allow filtering) to validate against.
+    :param data: (dict) Parsed VS item definition dict (passed to :func:`expand_vs_template`).
 
-    Returns
-    -------
-    list[tuple[str, str, str]]
-        ``(json_path, original_pattern, expanded_pattern)`` for every
-        expansion that matches no valid variant.
+    :return: (list[tuple[str, str, str]]) ``(json_path, original_pattern, expanded_pattern)`` for every expansion that matches no valid variant.
     """
     invalid: list[tuple[str, str, str]] = []
     for path, pattern in patterns:
