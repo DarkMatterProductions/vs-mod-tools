@@ -66,7 +66,7 @@ def _add_static_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _build_parser(data: dict) -> argparse.ArgumentParser:  # type: ignore[type-arg]
+def _build_parser(data: dict) -> argparse.ArgumentParser:
     """
     Build and return the full argument parser, including dynamic group filter
     arguments based on the provided JSON data.

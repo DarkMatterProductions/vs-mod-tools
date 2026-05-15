@@ -34,5 +34,7 @@ def load_vs_json(path: Path) -> dict:  # type: ignore[type-arg]
     dict
         The parsed item definition.
     """
+    payload = {}
     with path.open(encoding="utf-8-sig") as fh:
-        return json5.load(fh)  # type: ignore[no-any-return]
+        payload = json5.load(fh)  # type: ignore[no-any-return]
+    return payload
