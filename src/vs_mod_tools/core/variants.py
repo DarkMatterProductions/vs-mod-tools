@@ -15,14 +15,10 @@ def raw_cartesian(data: dict) -> list[str]:  # type: ignore[type-arg]
     :return: (list[str]) Every possible variant code, e.g. ``["item-head-leather", ...]``.
     """
     prefix: str = data["code"]
-    group_states: list[list[str]] = [
-        group["states"] for group in data["variantgroups"]
-    ]
+    group_states: list[list[str]] = [group["states"] for group in data["variantgroups"]]
     if not group_states:
         return [prefix]
-    return [
-        f"{prefix}-" + "-".join(combo) for combo in product(*group_states)
-    ]
+    return [f"{prefix}-" + "-".join(combo) for combo in product(*group_states)]
 
 
 def generate_variants(
@@ -50,26 +46,16 @@ def generate_variants(
             states = [s for s in states if s in allowed]
         filtered_states.append(states)
 
-    variants: list[str] = [
-        f"{prefix}-" + "-".join(combo) for combo in product(*filtered_states)
-    ]
+    variants: list[str] = [f"{prefix}-" + "-".join(combo) for combo in product(*filtered_states)]
 
     # Subtractive pass — skipVariants
     skip_patterns: list[str] = data.get("skipVariants") or []
     if skip_patterns:
-        variants = [
-            v
-            for v in variants
-            if not any(fnmatch.fnmatch(v, p) for p in skip_patterns)
-        ]
+        variants = [v for v in variants if not any(fnmatch.fnmatch(v, p) for p in skip_patterns)]
 
     # Filtering pass — allowedVariants
     allowed_patterns: list[str] = data.get("allowedVariants") or []
     if allowed_patterns:
-        variants = [
-            v
-            for v in variants
-            if any(fnmatch.fnmatch(v, p) for p in allowed_patterns)
-        ]
+        variants = [v for v in variants if any(fnmatch.fnmatch(v, p) for p in allowed_patterns)]
 
     return variants

@@ -3,6 +3,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 from vs_mod_tools.core.loader import load_vs_json
 from vs_mod_tools.core.validation import extract_patterns, find_invalid_patterns
@@ -66,7 +67,7 @@ def _add_static_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _build_parser(data: dict) -> argparse.ArgumentParser:
+def _build_parser(data: Dict[str, Any]) -> argparse.ArgumentParser:
     """
     Build and return the full argument parser, including dynamic group filter arguments based on the provided JSON data.
 
@@ -144,20 +145,15 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv_list)
 
     # Build per-group filter map:  group_code → [state, …]  or  []  (no filter)
-    user_filters: dict[str, list[str]] = {
-        group["code"]: getattr(args, group["code"].replace("-", "_")) or []
-        for group in data["variantgroups"]
+    user_filters: Dict[str, List[str]] = {
+        group["code"]: getattr(args, group["code"].replace("-", "_")) or [] for group in data["variantgroups"]
     }
 
     # ── Variant output ────────────────────────────────────────────────────────
     variants = generate_variants(data, user_filters)
 
     active_filters = {k: v for k, v in user_filters.items() if v}
-    filter_note = (
-        "  Filters: " + ", ".join(f"--{k} {v}" for k, v in active_filters.items())
-        if active_filters
-        else ""
-    )
+    filter_note = "  Filters: " + ", ".join(f"--{k} {v}" for k, v in active_filters.items()) if active_filters else ""
 
     sep = "─" * 64
     print(sep)
@@ -192,6 +188,7 @@ def main(argv: list[str] | None = None) -> None:
         else:
             print("  Validation — all patterns match at least one variant ✓")
         print(sep)
+
 
 if __name__ == "__main__":
     main()

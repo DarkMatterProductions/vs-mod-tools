@@ -95,10 +95,7 @@ class TestLoadVsJson:
     def test_strips_utf8_bom(self, tmp_path: Path) -> None:
         """A leading UTF-8 BOM (0xEF 0xBB 0xBF) does not cause a parse error."""
         bom_file = tmp_path / "bom.json"
-        bom_file.write_bytes(
-            b"\xef\xbb\xbf"  # UTF-8 BOM
-            + b'{"code": "armor", "variantgroups": []}'
-        )
+        bom_file.write_bytes(b"\xef\xbb\xbf" + b'{"code": "armor", "variantgroups": []}')  # UTF-8 BOM
 
         result = load_vs_json(bom_file)
 

@@ -22,9 +22,7 @@ def expand_vs_template(pattern: str, data: dict) -> list[str]:  # type: ignore[t
     if not tokens:
         return [pattern]
 
-    group_states: dict[str, list[str]] = {
-        g["code"]: g["states"] for g in data["variantgroups"]
-    }
+    group_states: dict[str, list[str]] = {g["code"]: g["states"] for g in data["variantgroups"]}
 
     # Preserve insertion order; de-duplicate in case a token appears twice.
     seen: set[str] = set()

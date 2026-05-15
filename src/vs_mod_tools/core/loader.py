@@ -1,17 +1,17 @@
 """VS JSON file loader supporting relaxed JSON5 syntax."""
 
 from pathlib import Path
+from typing import Any, Dict, List, Union
 
 try:
     import json5
 except ImportError:
     raise SystemExit(
-        "error: the 'json5' library is required to parse VS JSON files.\n"
-        "       Install it with:  pip install json5"
+        "error: the 'json5' library is required to parse VS JSON files.\n" "       Install it with:  pip install json5"
     )
 
 
-def load_vs_json(path: Path) -> dict:  # type: ignore[type-arg]
+def load_vs_json(path: Path) -> Dict[str, Any]:
     """
     Load a Vintage Story JSON file.
 
@@ -23,5 +23,5 @@ def load_vs_json(path: Path) -> dict:  # type: ignore[type-arg]
     """
     payload = {}
     with path.open(encoding="utf-8-sig") as fh:
-        payload = json5.load(fh)  # type: ignore[no-any-return]
-    return payload
+        payload = json5.load(fh)
+    return payload  # type: ignore[no-any-return]

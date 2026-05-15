@@ -48,8 +48,13 @@ packages = ["src/vs_mod_tools"]
 # ── black ─────────────────────────────────────────────────────────────────────
 
 [tool.black]
-line-length = 88
-target-version = ["py311"]
+line-length = 120
+target-version = [
+    "py311",
+    "py312",
+    "py313",
+    "py314",
+]
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -57,6 +62,8 @@ exclude = '''
   | \.venv
   | build
   | dist
+  | /src/*.egg-info/
+  | tests/resources
 )/
 '''
 
@@ -65,7 +72,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 src_paths = ["src", "tests"]
-line_length = 88
+line_length = 120
 known_first_party = ["vs_mod_tools"]
 
 # ── mypy ──────────────────────────────────────────────────────────────────────
@@ -76,14 +83,21 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true      # json5 ships no stubs
-mypy_path = "src"
+mypy_path = ["src", "src/python"]
+files = ["src", "src/python"]
+exclude = [
+    "build/",
+    "dist/",
+    ".*.egg-info/",
+]
 
 # ── flake8 (via flake8-pyproject) ─────────────────────────────────────────────
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 120
 extend-ignore = [
     "E203",   # whitespace before ':' — conflicts with black
+    "E501",   # line too long — conflicts with black
     "W503",   # line break before binary operator — conflicts with black
 ]
 exclude = [".git", "__pycache__", ".venv", "build", "dist"]
@@ -94,7 +108,12 @@ per-file-ignores = [
 # ── pytest ────────────────────────────────────────────────────────────────────
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+pythonpath = [
+    "src"
+]
+testpaths = [
+    "tests"
+]
 addopts = [
     "--cov=vs_mod_tools",
     "--cov-report=term-missing",
